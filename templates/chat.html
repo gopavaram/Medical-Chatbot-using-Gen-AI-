@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dr. Chatbot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="chat-box">
+
+    <div class="chat-box-header">
+      <div class="header-text">
+        <h3>👨‍⚕️ <strong>Talk to Dr. Bot</strong></h3>
+        <p>Your virtual health assistant</p>
+      </div>
+    </div>
+
+
+    <div class="chat-box-body" id="chat-body">
+      <!-- Messages will be appended here -->
+    </div>
+
+    <div class="chat-box-footer">
+      <input id="msg-input" placeholder="Type your message..." type="text" />
+      <button class="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById("msg-input");
+
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    function sendMessage() {
+      const message = input.value.trim();
+      if (message === "") return;
+
+      // Append user message
+      const userMsg = document.createElement("div");
+      userMsg.className = "chat-box-body-send";
+      userMsg.innerHTML = `<p>${message}</p>`;
+      document.getElementById("chat-body").appendChild(userMsg);
+
+      fetch("/get", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `msg=${encodeURIComponent(message)}`
+      })
+      .then(res => res.text())
+      .then(reply => {
+        const botMsg = document.createElement("div");
+        botMsg.className = "chat-box-body-receive";
+        botMsg.innerHTML = `<p>${reply}</p>`;
+        document.getElementById("chat-body").appendChild(botMsg);
+        document.getElementById("chat-body").scrollTop = document.getElementById("chat-body").scrollHeight;
+      });
+
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
